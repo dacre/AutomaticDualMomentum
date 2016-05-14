@@ -28,10 +28,12 @@ def get_12_month_gain(fund_ticker, fund_name):
     table_body = table.find('tbody')
     rows = table_body.find_all('tr')
     for row in rows:
-        if row.th.string.encode('utf-8') == fund_name:
+        if row.th.string.encode('utf-8').find('NAV'):
             tds = table_body.find_all('td')
             return unicode(tds[6].string)
     raise LookupError("Could not find the fund data when looking for fund: " + fund_name)
+
+print "Analyzing which fond had best return for 1 year..."
     
 local_fund_12_month_gain = get_12_month_gain(local_fund_ticker, local_fund_name)
 global_fund_12_month_gain = get_12_month_gain(global_fund_ticker, global_fund_name)
@@ -64,25 +66,27 @@ print "winner: " + winner[1] + ". With increase of: " + str(winner[0])
 import smtplib
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
- 
 import sys
 
-fromaddr = sys.argv[1]
-toaddr = sys.argv[3]
-msg = MIMEMultipart()
-msg['From'] = fromaddr
-msg['To'] = toaddr
-msg['Subject'] = "Bästa fonden för den kommande månaden!"
- 
-body = """Hej! \r\nJust nu är det bäst att investera i """ + winner[1] + """ som har haft """ + str(winner[0]) + """% utveckling de senaste 12 månaderna. \r\n
-De andra alternativen är """ + losers[0][1] + """ med """ + str(losers[0][0]) + """% utveckling och """ + losers[1][1] + """ med """ + str(losers[1][0]) + """% utveckling. \r\n Lycka till!"""
+if (len(sys.argv) != 4):
+    print "No command line arguments supplied. (Looking for: From Email, From Email Password, To Email)"
+else:
+    fromaddr = sys.argv[1]
+    toaddr = sys.argv[3]
+    msg = MIMEMultipart()
+    msg['From'] = fromaddr
+    msg['To'] = toaddr
+    msg['Subject'] = "Bästa fonden för den kommande månaden!"
 
-print body
-msg.attach(MIMEText(body, 'plain'))
+    body = """Hej! \r\nJust nu är det bäst att investera i """ + winner[1] + """ som har haft """ + str(winner[0]) + """% utveckling de senaste 12 månaderna. \r\n
+    De andra alternativen är """ + losers[0][1] + """ med """ + str(losers[0][0]) + """% utveckling och """ + losers[1][1] + """ med """ + str(losers[1][0]) + """% utveckling. \r\n Lycka till!"""
+
+    print body
+    msg.attach(MIMEText(body, 'plain'))
  
-server = smtplib.SMTP('smtp.gmail.com', 587)
-server.starttls()
-server.login(fromaddr, sys.argv[2])
-text = msg.as_string()
-server.sendmail(fromaddr, toaddr, text)
-server.quit()
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.starttls()
+    server.login(fromaddr, sys.argv[2])
+    text = msg.as_string()
+    server.sendmail(fromaddr, toaddr, text)
+    server.quit()
