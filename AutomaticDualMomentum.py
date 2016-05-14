@@ -2,7 +2,7 @@
 # -*- coding: iso-8859-1 -*-
 # -*- coding: utf-8 -*-
 
-# this script checks which fund is best to hold for the coming month according to Antonaccis dual momentum theory
+# this script checks which fund is best to hold for the coming month according to Antonacci's dual momentum theory
 
 # get percentage YTD for global, local and risk free interst
 local_fund_ticker = "0P00000FYQ"
