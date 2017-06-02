@@ -7,11 +7,11 @@
 
 import sys
 
-local_fund_ticker = "0P00000FYQ"
-local_fund_name = "SPP Aktiefond Sverige"
+local_fund_ticker = "0P0000J1JM"
+local_fund_name = "Länsförsäkringar Sverige Indexnära"
 
-global_fund_ticker = "0P00000LST"
-global_fund_name = "SPP Aktiefond Global"
+global_fund_ticker = "0P0000YVZ3"
+global_fund_name = "Länsförsäkringar Global Indexnära"
 
 risk_free_interest_fund_ticker = "0P00009NT9"
 risk_free_interest_fund_name = "Spiltan Räntefond Sverige"
@@ -33,7 +33,7 @@ def get_12_month_gain(fund_ticker):
         for row in rows:
             if row.th.string.encode('utf-8').find('NAV'):
                 tds = table_body.find_all('td')
-                return unicode(tds[6].string)
+                return unicode(tds[5].string)
     except urllib2.URLError as e:
         raise LookupError("Could not find the fund data when looking for fund ticker: " + fund_ticker +
                           " \r\n Detailed issue: " + e.args[0].strerror)
