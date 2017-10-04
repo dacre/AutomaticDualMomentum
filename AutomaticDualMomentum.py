@@ -43,12 +43,18 @@ def get_12_month_gain(fund_ticker):
 
 
 def create_body():
-    return """Hej! " + \
-            "\r\n\r\nJust nu är det bäst att investera i """ + winner[1] + """ som har haft """ + str(winner[0]) + \
-           """% utveckling de senaste 12 månaderna. \r\n" + \
-           "De andra alternativen är """ + losers[0][1] + """ med """ + \
-           str(losers[0][0]) + """% utveckling och """ + \
-           losers[1][1] + """ med """ + str(losers[1][0]) + """% utveckling. \r\n\r\nLycka till!"""
+    result = """Hej! 
+            \r\nJust nu är det bäst att investera i {winner1_name} som har haft {winner1_result}% utveckling de senaste 12 månaderna. 
+            \rDe andra alternativen är {loser1_name} med {loser1_result}% utveckling och {loser2_name} med {loser2_result}% utveckling. 
+            \r\nLycka till!""".format(
+        winner1_name=winner[1],
+        winner1_result=str(winner[0]),
+        loser1_name=losers[0][1],
+        loser1_result=str(losers[0][0]),
+        loser2_name=losers[1][1],
+        loser2_result=str(losers[1][0]),
+    )
+    return result
 
 
 def send_email(subject, email_body):
@@ -62,7 +68,6 @@ def send_email(subject, email_body):
     msg['From'] = fromaddr
     msg['To'] = toaddr
     msg['Subject'] = subject
-    msg.attach(MIMEText(create_body(), 'plain'))
     msg.attach(MIMEText(email_body, 'plain'))
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.starttls()
