@@ -16,7 +16,6 @@ global_fund_name = "Länsförsäkringar Global Indexnära"
 risk_free_interest_fund_ticker = "0P00009NT9"
 risk_free_interest_fund_name = "Spiltan Räntefond Sverige"
 
-# select the best
 morningstar_base_url = "http://performance.morningstar.com/Performance/cef/trailing-total-returns.action?t="
 
 
@@ -42,10 +41,10 @@ def get_12_month_gain(fund_ticker):
                           " \r\n Detailed issue: " + e.message)
 
 
-def create_body():
-    result = """Hej! 
-            \r\nJust nu är det bäst att investera i {winner1_name} som har haft {winner1_result}% utveckling de senaste 12 månaderna. 
-            \rDe andra alternativen är {loser1_name} med {loser1_result}% utveckling och {loser2_name} med {loser2_result}% utveckling. 
+def create_body(winner, losers):
+    result = """Hej!
+            \r\nJust nu är det bäst att investera i {winner1_name} som har haft {winner1_result}% utveckling de senaste 12 månaderna.
+            \rDe andra alternativen är {loser1_name} med {loser1_result}% utveckling och {loser2_name} med {loser2_result}% utveckling.
             \r\nLycka till!""".format(
         winner1_name=winner[1],
         winner1_result=str(winner[0]),
@@ -77,9 +76,7 @@ def send_email(subject, email_body):
     server.quit()
 
 
-print "Analyzing which fund had best return for 1 year..."
-
-try:
+def lookup_winner():
     local_fund_12_month_gain = get_12_month_gain(local_fund_ticker)
     global_fund_12_month_gain = get_12_month_gain(global_fund_ticker)
     risk_free_interest_fund_12_month_gain = get_12_month_gain(risk_free_interest_fund_ticker)
@@ -103,17 +100,42 @@ try:
             winner = risk_free_fund_tuple
             losers = (global_fund_tuple, local_fund_tuple)
 
-    print "Fund with best return last 12 months: {0}. It had a return of: {1}".format(winner[1], str(winner[0]))
+    return(winner, losers)
 
-    body = create_body()
-    if len(sys.argv) == 2 and sys.argv[1] == "cli":
-        print "\r\n" + body
-    elif len(sys.argv) != 4:
-        print "No command line arguments supplied. (Looking for: From Email, From Email Password, To Email)"
+
+def main():
+    print "Analyzing which fund had best return for previous 12 months..."
+
+    try:
+        result = lookup_winner()
+        winner = result[0]
+        losers = result[1]
+
+    except LookupError as le:
+        print ("Lookup error", le.message)
+        if len(sys.argv) != 4:
+            print le.message
+        else:
+            send_email("Lookup error", le.message)
     else:
-        send_email("Bästa fonden för den kommande månaden!", body)
-except LookupError as le:
-    if len(sys.argv) != 4:
-        print le.message
-    else:
-        send_email("Lookup error", le.message)
+        w1 = winner[1].decode('ISO-8859-1').encode("utf-8")
+        w2 = str(winner[0]).decode('ISO-8859-1').encode("utf-8")
+        print "Best fund: {0}. It returned: {1}%".format(w1, w2)
+
+        body = create_body(winner, losers)
+        if len(sys.argv) == 2 and sys.argv[1] == "cli":
+            print "\r\nThe complete message that would have been sent:"
+            print "-----"
+            utf_ok_body = body.decode('ISO-8859-1').encode("utf-8")
+            print utf_ok_body
+            print "-----"
+        elif len(sys.argv) != 4:
+            print """No command line arguments supplied.
+            (Looking for: From Email,
+            From Email Password, To Email)"""
+        else:
+            send_email("Bästa fonden för den kommande månaden!", body)
+
+
+if __name__ == "__main__":
+    main()
